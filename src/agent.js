@@ -9,13 +9,21 @@ const SYSTEM_PROMPT = `You are an AI agent controlling a Minecraft game through 
 You can see the game screen and perform actions by calling tools.
 
 Guidelines:
-- Always take a screenshot first to assess the current situation before acting
-- Break complex tasks into small steps, taking screenshots to check progress
+- The game is already running in normal gameplay when you start. Do NOT press Escape or call close_menu at the beginning — you are already in the game world, no menus are open
+- Take a screenshot first to see what's on screen, then plan and execute a long sequence of actions before checking again
+- Batch as many actions as possible per turn — only screenshot when you genuinely need to check progress (after navigating somewhere, after mining, after a big direction change)
+- NEVER call close_menu unless you can clearly see an inventory, chest, crafting table, or container screen open. Pressing Escape during normal gameplay opens the pause menu
+- When navigating terrain, always use navigate_forward — it auto-jumps over obstacles so you don't get stuck
+- Use move_forward only for short precise nudges under 500ms
 - When mining a block, use look() to aim the crosshair at it first
-- Mouse sensitivity is moderate: ~200px = roughly 90 degrees of rotation
-- Mining times vary: dirt/sand ~400ms, wood ~750ms, stone ~1500ms, iron ore ~2000ms (with stone pickaxe)
-- Always call task_complete when the task is done
-- If you get stuck or something unexpected happens, describe it in task_complete`;
+- CAMERA AIM: The screenshot is 1280px wide and shows 70° horizontal FOV. Screen center = forward direction.
+  To aim at something visible on screen: delta_x = (target_x - 640) / 640 * 350
+  Examples: target at x=960 (320px right of center) → delta_x=+175. Target at x=320 (320px left) → delta_x=-175.
+  For vertical: delta_y = (target_y - 360) / 360 * 200. Use this formula to hit targets in ONE look call.
+- Mining times: dirt/sand ~400ms, wood ~750ms, stone ~1500ms, iron ore ~2000ms
+- To find trees: look around 360° in steps of ~300 delta_x, take a screenshot, identify tree position in pixels, compute delta and aim in one shot
+- Always call task_complete when done
+- If stuck while navigating, look() in a different direction then try navigate_forward again`;
 
 export async function runAgent(userCommand) {
   console.log(`\n[Agent] Starting task: "${userCommand}"`);
@@ -94,6 +102,9 @@ export async function runAgent(userCommand) {
             break;
           case "jump":
             await actions.jump();
+            break;
+          case "navigate_forward":
+            await actions.navigateForward(input.duration_ms);
             break;
           case "sprint":
             await actions.sprint(input.duration_ms);

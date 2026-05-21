@@ -63,6 +63,17 @@ export const tools = [
     input_schema: { type: "object", properties: {}, required: [] },
   },
   {
+    name: "navigate_forward",
+    description: "Walk forward while automatically jumping every ~600ms to get over obstacles, uneven ground, and blocks. Use this for all terrain traversal.",
+    input_schema: {
+      type: "object",
+      properties: {
+        duration_ms: { type: "number", description: "Milliseconds to walk. 1000ms ≈ 4 blocks, 3000ms ≈ 12 blocks." },
+      },
+      required: ["duration_ms"],
+    },
+  },
+  {
     name: "sprint",
     description: "Sprint forward (double-tap W then hold) for a duration",
     input_schema: {
@@ -112,7 +123,7 @@ export const tools = [
   },
   {
     name: "close_menu",
-    description: "Close any open menu or inventory (press Escape)",
+    description: "Close an open inventory, chest, crafting table, or furnace menu (press Escape). WARNING: only call this when you can see an inventory or container menu on screen. If you press Escape during normal gameplay it will open the PAUSE menu and break everything.",
     input_schema: { type: "object", properties: {}, required: [] },
   },
   {
